@@ -2,7 +2,7 @@
 -- ==========================================
 -- CROWNFIELD EYE HOSPITAL
 -- PART D1: PATIENT VIEW SECURITY TESTING
--- FILE: 06_testing.sql
+--09_patient_security_testing.sql
 -- ==========================================
 
 USE crownfield_eye_hospital;
