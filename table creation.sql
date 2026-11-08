@@ -1,0 +1,190 @@
+
+-- CROWNFIELD EYE HOSPITAL DATABASE
+-- FILE: 01_schema.sql
+
+-- WARNING: This script drops and recreates the coursework tables.
+
+CREATE DATABASE IF NOT EXISTS crownfield_eye_hospital
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE crownfield_eye_hospital;
+
+-- Drop existing tables in child-to-parent order
+DROP TABLE IF EXISTS FOLLOW_UP_PLAN;
+DROP TABLE IF EXISTS PRESCRIPTION_ITEM;
+DROP TABLE IF EXISTS APPOINTMENT_DIAGNOSIS;
+DROP TABLE IF EXISTS PRESCRIPTION;
+DROP TABLE IF EXISTS MEDICINE;
+DROP TABLE IF EXISTS DIAGNOSIS;
+DROP TABLE IF EXISTS APPOINTMENT;
+DROP TABLE IF EXISTS CLINICIAN;
+DROP TABLE IF EXISTS CLINIC;
+DROP TABLE IF EXISTS SPECIALTY;
+DROP TABLE IF EXISTS PATIENT;
+
+-- 1. PATIENT
+CREATE TABLE PATIENT (
+    patient_id VARCHAR(10) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    postcode VARCHAR(15) NOT NULL,
+    PRIMARY KEY (patient_id)
+) ENGINE = InnoDB;
+
+-- 2. SPECIALTY
+CREATE TABLE SPECIALTY (
+    specialty_id INT NOT NULL AUTO_INCREMENT,
+    specialty_name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (specialty_id),
+    UNIQUE (specialty_name)
+) ENGINE = InnoDB;
+
+-- 3. CLINICIAN
+CREATE TABLE CLINICIAN (
+    clinician_id INT NOT NULL AUTO_INCREMENT,
+    clinician_name VARCHAR(100) NOT NULL,
+    specialty_id INT NULL,
+    PRIMARY KEY (clinician_id)
+) ENGINE = InnoDB;
+
+-- 4. CLINIC
+CREATE TABLE CLINIC (
+    clinic_id INT NOT NULL AUTO_INCREMENT,
+    clinic_name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (clinic_id),
+    UNIQUE (clinic_name)
+) ENGINE = InnoDB;
+
+-- 5. APPOINTMENT
+CREATE TABLE APPOINTMENT (
+    appointment_id INT NOT NULL AUTO_INCREMENT,
+    patient_id VARCHAR(10) NOT NULL,
+    clinician_id INT NOT NULL,
+    clinic_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    notes VARCHAR(255) NULL,
+    PRIMARY KEY (appointment_id)
+) ENGINE = InnoDB;
+
+-- 6. DIAGNOSIS
+CREATE TABLE DIAGNOSIS (
+    diagnosis_id INT NOT NULL AUTO_INCREMENT,
+    diagnosis_name VARCHAR(150) NOT NULL,
+    PRIMARY KEY (diagnosis_id),
+    UNIQUE (diagnosis_name)
+) ENGINE = InnoDB;
+
+-- 7. APPOINTMENT_DIAGNOSIS
+CREATE TABLE APPOINTMENT_DIAGNOSIS (
+    appointment_id INT NOT NULL,
+    diagnosis_id INT NOT NULL,
+    PRIMARY KEY (appointment_id, diagnosis_id)
+) ENGINE = InnoDB;
+
+-- 8. PRESCRIPTION
+CREATE TABLE PRESCRIPTION (
+    prescription_id INT NOT NULL AUTO_INCREMENT,
+    appointment_id INT NOT NULL,
+    PRIMARY KEY (prescription_id)
+) ENGINE = InnoDB;
+
+-- 9. MEDICINE
+CREATE TABLE MEDICINE (
+    medicine_id INT NOT NULL AUTO_INCREMENT,
+    medicine_name VARCHAR(150) NOT NULL,
+    PRIMARY KEY (medicine_id),
+    UNIQUE (medicine_name)
+) ENGINE = InnoDB;
+
+-- 10. PRESCRIPTION_ITEM
+CREATE TABLE PRESCRIPTION_ITEM (
+    prescription_item_id INT NOT NULL AUTO_INCREMENT,
+    prescription_id INT NOT NULL,
+    medicine_id INT NOT NULL,
+    dose VARCHAR(100) NOT NULL,
+    route VARCHAR(50) NOT NULL,
+    frequency VARCHAR(100) NOT NULL,
+    duration VARCHAR(100) NOT NULL,
+    PRIMARY KEY (prescription_item_id)
+) ENGINE = InnoDB;
+
+-- 11. FOLLOW_UP_PLAN
+CREATE TABLE FOLLOW_UP_PLAN (
+    follow_up_id INT NOT NULL AUTO_INCREMENT,
+    appointment_id INT NOT NULL,
+    due_date DATE NOT NULL,
+    priority VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Planned',
+    PRIMARY KEY (follow_up_id),
+    UNIQUE (appointment_id),
+    CHECK (priority IN ('Routine', 'High', 'Urgent')),
+    CHECK (status IN ('Planned', 'Scheduled', 'Completed', 'Cancelled'))
+) ENGINE = InnoDB;
+
+-- ADD FOREIGN KEYS USING ALTER TABLE
+
+ALTER TABLE CLINICIAN
+ADD CONSTRAINT fk_clinician_specialty
+FOREIGN KEY (specialty_id)
+REFERENCES SPECIALTY(specialty_id)
+ON UPDATE CASCADE
+ON DELETE SET NULL;
+
+ALTER TABLE APPOINTMENT
+ADD CONSTRAINT fk_appointment_patient
+FOREIGN KEY (patient_id)
+REFERENCES PATIENT(patient_id)
+ON UPDATE CASCADE ON DELETE RESTRICT,
+
+ADD CONSTRAINT fk_appointment_clinician
+FOREIGN KEY (clinician_id)
+REFERENCES CLINICIAN(clinician_id)
+ON UPDATE CASCADE ON DELETE RESTRICT,
+
+ADD CONSTRAINT fk_appointment_clinic
+FOREIGN KEY (clinic_id)
+REFERENCES CLINIC(clinic_id)
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE APPOINTMENT_DIAGNOSIS
+ADD CONSTRAINT fk_appt_diagnosis_appointment
+FOREIGN KEY (appointment_id)
+REFERENCES APPOINTMENT(appointment_id)
+ON UPDATE CASCADE ON DELETE RESTRICT,
+
+ADD CONSTRAINT fk_appt_diagnosis_diagnosis
+FOREIGN KEY (diagnosis_id)
+REFERENCES DIAGNOSIS(diagnosis_id)
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE PRESCRIPTION
+ADD CONSTRAINT fk_prescription_appointment
+FOREIGN KEY (appointment_id)
+REFERENCES APPOINTMENT(appointment_id)
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE PRESCRIPTION_ITEM
+ADD CONSTRAINT fk_prescription_item_prescription
+FOREIGN KEY (prescription_id)
+REFERENCES PRESCRIPTION(prescription_id)
+ON UPDATE CASCADE ON DELETE RESTRICT,
+
+ADD CONSTRAINT fk_prescription_item_medicine
+FOREIGN KEY (medicine_id)
+REFERENCES MEDICINE(medicine_id)
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE FOLLOW_UP_PLAN
+ADD CONSTRAINT fk_follow_up_appointment
+FOREIGN KEY (appointment_id)
+REFERENCES APPOINTMENT(appointment_id)
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+-- VERIFY THE DATABASE STRUCTURE
+SHOW TABLES;
+
+DESCRIBE APPOINTMENT;
+
+SHOW CREATE TABLE APPOINTMENT;
