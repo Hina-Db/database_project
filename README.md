@@ -4,77 +4,78 @@ Module: CPU4103 — Introduction to Database
 
 Student: Hina Javed
 
+
 Database platform: MySQL 8.0 / MySQL Workbench
 
 Project type: Individual SQL submission based on a collaborative database design
 Project overview
-This repository contains the schema, sample data, individual SQL features, security controls, and tests for a fictional ophthalmology database prototype for Crownfield Eye Hospital. It replaces fragmented records with related tables for patients, clinicians, clinics, appointments, diagnoses, prescriptions, medicines, and follow-up plans.
+This repository contains the database schema, sample data, individual SQL features, security controls and tests for a fictional ophthalmology database prototype for Crownfield Eye Hospital. It models patients, clinicians, clinics, appointments, diagnoses, prescriptions, medicines and follow-up plans.
 
-This is coursework using fictional and synthetic data, not a production hospital system or a source of clinical advice.
+The project uses fictional and clearly labelled synthetic test data. It is not a production hospital system or a source of clinical advice.
 Individual contribution
-My contribution included conceptual, logical and physical database diagrams, normalisation from unnormalised form (UNF) to third normal form (3NF), and individual SQL implementation and validation. My individual SQL work demonstrates aggregation, joins, a correlated subquery, a parameterised stored procedure, follow-up validation triggers, role-based permissions, patient-specific view access, encryption, and transaction control.
+My work includes conceptual, logical and physical ER diagrams; normalisation from unnormalised form (UNF) to third normal form (3NF); SQL table creation and population; four individual SELECT queries; a parameterised stored procedure; follow-up validation triggers; role-based access control; a patient-specific view; encryption demonstration; and transaction tests.
 
-The eleven core tables are:
+The eleven core tables are PATIENT, SPECIALTY, CLINICIAN, CLINIC, APPOINTMENT, DIAGNOSIS, APPOINTMENT_DIAGNOSIS, PRESCRIPTION, MEDICINE, PRESCRIPTION_ITEM and FOLLOW_UP_PLAN.
 
-PATIENT, SPECIALTY, CLINICIAN, CLINIC, APPOINTMENT, DIAGNOSIS, APPOINTMENT_DIAGNOSIS, PRESCRIPTION, MEDICINE, PRESCRIPTION_ITEM, and FOLLOW_UP_PLAN.
-
-PATIENT_DB_ACCOUNT and ENCRYPTED_NOTE_DEMO are additional tables used in the access-control and encryption demonstrations.
+PATIENT_DB_ACCOUNT and ENCRYPTED_NOTE_DEMO are additional demonstration tables used for security and data protection.
 Requirements
-- MySQL 8.0 with InnoDB support and MySQL Workbench (or an equivalent SQL client).
-- An account permitted to create databases, tables, triggers, stored procedures, views, roles and test users. Some operations require elevated privileges.
-- A separate, disposable coursework database environment. Do not execute these scripts against real patient data or a production database.
+- MySQL 8.0 with InnoDB support and MySQL Workbench (or an equivalent MySQL client).
+- A database account permitted to create schemas, tables, foreign keys, views, stored procedures, triggers, roles and local test accounts. Some steps require administrator-level privileges.
+- A fresh disposable coursework environment. Do not run these scripts against real patient data or a production database.
 SQL files and execution order
-The filenames below correspond exactly to the original uploaded files. In MySQL Workbench, open each file and execute its appropriate statements.
-Order	File	Purpose and execution notes
-1	table creation.sql	Create the crownfield_eye_hospital database, eleven core tables, keys, relationships and constraints. Destructive on rerun: drops core tables. Run in a fresh coursework environment.
-2	data_population.sql	Populate the eleven core tables with five source appointment examples and additional labelled synthetic records.
-3	6-testing.sql	Test controlled UPDATE, DELETE and a patient orphan check. The temporary patient is deleted during this test, so do not expect repeat execution to have the same before-state.
-4	B_Orphan_Reference_Integrity_Test.sql	Additional check that appointments reference existing patients, clinicians and clinics; expected result is zero orphan rows.
-5	3-individual queries.sql	Run four queries independently: GROUP BY/HAVING, four-table INNER JOIN, LEFT JOIN, and a correlated subquery.
-6	QUERY5 PROCEDURE_CREATION.sql	Create the parameterised sp_patient_appointments stored procedure.
-7	Run CALL sp_patient_appointments('OP001');	Test the procedure for patient OP001; this call can be executed directly in Workbench.
-8	4-Procedures_AND _triggers.sql	Create INSERT/UPDATE triggers enforcing valid follow-up dates, then test them. Run the test sections separately: the invalid-date INSERT and UPDATE are intentionally expected to fail; complete the verification and cleanup steps afterwards.
-9	5-Security.sql	Create four roles, apply grants, create PATIENT_DB_ACCOUNT, create the filtered v_patient_appointments view and provision example patient users. See the credential warning below before publishing.
-10	06_testing(1).sql	Security tests: run the mapping query as administrator, and run patient-view and access-denial queries using the appropriate patient account. Do not run the entire file as a single administrator session.
-11	07_data_protection.sql	Demonstrate AES-256-CBC encryption with HKDF, a random key, IV and salt, then decrypt a synthetic note. Run key generation, encryption and decryption in the same MySQL session.
-12	08_transactions.sql	Demonstrate an uncommitted change being undone by ROLLBACK and a saved change using COMMIT; take the evidence screenshots before the final synthetic-data cleanup.
+Run the main scripts in the order shown below. Open each script in MySQL Workbench and execute its statements as described; certain negative tests must be run individually.
+Order	SQL file	Purpose and notes
+1	01_table_creation.sql	Create the crownfield_eye_hospital database, the eleven core tables, primary and foreign keys, and constraints. Caution: this script drops existing core tables before recreating them.
+2	02_data_population.sql	Insert the five source appointment examples and additional clearly identified synthetic records.
+3	03_update_delete_testing.sql	Demonstrate controlled UPDATE, DELETE and an orphan-reference check. The temporary test patient is deleted by the script.
+4	04_orphan_reference_test.sql	Check that appointments reference existing patients, clinicians and clinics. Expected result: zero orphan rows.
+5	05_individual_queries.sql	Execute four queries separately: GROUP BY/`HAVING`, a four-table INNER JOIN, a LEFT JOIN, and a correlated subquery.
+6	06_procedure_creation.sql	Create the parameterised stored procedure sp_patient_appointments. Test it using CALL sp_patient_appointments('OP001'); in Workbench.
+7	07_triggers_and_testing.sql	Create the follow-up date validation triggers and test valid/invalid dates. Execute test statements in sections: deliberately invalid INSERT and UPDATE operations should fail; then verify and clean up the temporary records.
+8	08_security.sql	Create four database roles, assign privileges, map example patient accounts to patient IDs, create the patient-filtered appointment view, and provision local demonstration logins. Requires appropriate MySQL privileges.
+9	09_patient_security_testing.sql	Run the account-mapping check as an administrator, then run patient-specific view checks and intended access-denial tests using the patient test login. Do not execute the entire script as one administrator session.
+10	10_data_protection.sql	Demonstrate AES-256-CBC encryption and decryption of a synthetic note using HKDF and random key/IV/salt values. Run generation, encryption and decryption in the same MySQL session.
+11	11_transactions.sql	Demonstrate ROLLBACK reversing an update and COMMIT preserving an update, followed by synthetic-data clean-up.
 
 
-Supplementary scripts
-- Select_from_all tables.sql — inspect the contents of all eleven core tables.
-- date format correction.sql — display-format SELECT, not a data-correction UPDATE.
-- Q5 -PROCEDURE EXECUTION.sql — contains the stored procedure call and another copy of the trigger creation/testing code. It is an alternative working script, not an additional step after 4-Procedures_AND _triggers.sql; running both full scripts repeats the trigger work.
-Do not upload the six duplicate copies that end in (1) where an otherwise identical original exists. An exception is 06_testing(1).sql, which is not a duplicate of 6-testing.sql: it contains patient-view security tests.
+Supporting SQL scripts
+These are supplementary files, not additional mandatory execution steps:
+File	Purpose
+90_select_all_tables.sql	Display the contents of the eleven core tables for inspection.
+91_date_format_display.sql	Display appointment dates in a formatted SELECT; it does not modify stored dates.
+92_procedure_execution_alternative.sql	Contains the procedure call and duplicate trigger creation/testing. This is an alternative demonstration file; do not run it in full after 07_triggers_and_testing.sql. Use the stand-alone CALL above to test the procedure instead.
+
+
+Report screenshot filenames
+The SQL scripts were renamed with numeric prefixes for a clearer GitHub execution order. Screenshots in the submitted assessment report may show their original filenames. The numbered scripts represent the same SQL work, so the screenshot filenames may differ from the current repository filenames.
 Individual SQL features (Part C)
-1. Aggregate (GROUP BY and HAVING): identify clinicians with at least two appointments and count their appointments.
-2. INNER JOIN: show patient, clinician, clinic and appointment details using four related tables.
-3. LEFT JOIN: identify appointments with no associated prescription.
-4. Correlated subquery: find patients who have more than one appointment.
-5. Stored procedure: sp_patient_appointments(IN p_patient_id VARCHAR(10)), tested using OP001.
-6. Triggers: trg_validate_followup_date_insert and trg_validate_followup_date_update prevent a follow-up due date earlier than the appointment date. The triggers set an invalid date to NULL, which is rejected because FOLLOW_UP_PLAN.due_date is NOT NULL; the intentional test errors are expected.
-The report includes the questions, explanation and screenshots of the executed results.
+1. Aggregation: GROUP BY and HAVING identify clinicians with at least two appointments.
+2. Four-table INNER JOIN: joins appointments with patients, clinicians and clinics.
+3. LEFT JOIN: shows appointments, including those without prescriptions.
+4. Correlated subquery: identifies patients who have more than one appointment.
+5. Stored procedure: sp_patient_appointments(IN p_patient_id VARCHAR(10)), demonstrated for OP001.
+6. Triggers: trg_validate_followup_date_insert and trg_validate_followup_date_update prevent due dates earlier than appointment dates. For an invalid date they set NEW.due_date to NULL, and the table's NOT NULL constraint rejects the operation; those errors are expected test results.
+The individual assessment report explains the purpose of each feature and includes executed SQL and result screenshots.
 Security and data protection (Part D)
-Four roles are used: hospital_admin_role, doctor_role, receptionist_role, and patient_role. The patient role has access to v_patient_appointments rather than direct access to the underlying patient and appointment tables. The view filters by the database username through PATIENT_DB_ACCOUNT.
+Four database roles demonstrate different privileges: hospital_admin_role, doctor_role, receptionist_role and patient_role.
 
-The patient test verifies access to the logged-in patient's appointments, no rows for another patient's identifier, and denial of direct table access.
+The patient role receives SELECT on v_patient_appointments rather than direct access to the underlying patient and appointment tables. The view uses PATIENT_DB_ACCOUNT to restrict returned appointments to the current database username. The security tests demonstrate access to the patient's own appointments, an empty result for another patient, and expected denial of direct table access.
 
-The data protection demonstration uses ENCRYPTED_NOTE_DEMO and MySQL AES_ENCRYPT() / AES_DECRYPT() with AES-256-CBC, HKDF, a random IV and salt. The encryption key is a temporary session variable, so it is not persistent key management.
+10_data_protection.sql demonstrates AES_ENCRYPT() and AES_DECRYPT() using AES-256-CBC, HKDF, a random IV and salt. The randomly generated encryption key exists only in a session variable. This is a coursework demonstration, not production key management.
 
-Security warning before GitHub upload: 5-Security.sql currently contains fixed example passwords in CREATE USER statements. Do not publish working passwords. Replace them with non-secret placeholders or provide separate local-only user-provisioning instructions; change any passwords that have already been used. Do not upload real patient data or encryption keys.
-Test outcomes and interpretation
-The coursework tests cover populated table counts, controlled update/delete operations, the absence of orphan appointment references, procedure output for OP001, expected failures for invalid follow-up dates, patient-view permission restrictions, encryption/decryption of a synthetic note, and COMMIT/ROLLBACK behavior. The accompanying report records the observed MySQL Workbench evidence.
-
-Tests are not all designed to run as one uninterrupted batch. Some require different database users; the negative trigger tests are designed to raise errors.
-Assumptions and limitations
-- The five initial appointments are derived from the fictional assessment scenario; the extra rows are identified as synthetic test records.
-- Missing dose, route, frequency and duration are represented by non-clinical text placeholders rather than invented prescribing instructions.
-- The source's follow-up intervals are converted into due dates; Planned is an assumed initial status.
-- An appointment with the medicine value None is represented without a prescription.
-- The core model comprises eleven tables; the login mapping and encrypted-note demo tables extend it for testing.
-- This prototype is not clinically validated. Production use would require stronger account provisioning, managed encryption keys, audit logging, broader role testing, and more extensive validation.
-Re-running safely
-table creation.sql drops and recreates the core tables. After security and encryption scripts have been run, the extra PATIENT_DB_ACCOUNT and ENCRYPTED_NOTE_DEMO tables also reference core tables. Therefore, do not rerun the schema script over an existing populated database without first accounting for these dependent tables. The recommended approach is to recreate a fresh, isolated coursework database and follow the documented order.
-Repository evidence
-Include the original conceptual, logical, and physical ERD diagrams (including the editable diagram file) in a clearly named ERD/ folder, and ensure the main report and recorded presentation refer to the same schema and SQL.
+Demonstration credentials: 08_security.sql contains fixed example passwords for local fictional test accounts only. They are not intended for real accounts or network-exposed installations; do not reuse them for any real service. If any password has been used outside the isolated test environment, change it before publishing. GitHub commit history may retain earlier versions of a file.
+Testing notes and limitations
+- The original appointment examples are taken from the fictional assessment scenario. Additional rows are labelled as synthetic test data.
+- The source postcode for OP001 is NE1 4AB, which is used in the corrected population script.
+- Where the source does not provide dose, route, frequency or duration, the seed data uses explicit source data not provided placeholders rather than inventing medical instructions.
+- The source's follow-up intervals were converted to due dates; Planned was used as the assumed initial status.
+- An appointment without a medicine is represented without a prescription record.
+- Negative trigger tests are deliberately expected to raise errors; subsequent verification and cleanup statements should be executed separately.
+- Some access-control tests must be performed with different MySQL connections (administrator versus patient), not in a single session.
+- The demonstration does not claim clinical validation or production-grade security.
+Re-running the project
+01_table_creation.sql drops and recreates the eleven core tables. Later security and encryption scripts create PATIENT_DB_ACCOUNT and ENCRYPTED_NOTE_DEMO, which have foreign keys to core tables. After those extensions exist, rerunning the schema script against the same database can fail because of those dependencies. The safest approach is to use a fresh disposable MySQL database environment and follow the execution order above.
+ER diagrams and evidence
+The repository includes the editable conceptual, logical and physical ER diagrams along with the SQL scripts and this README. Diagram filenames may differ from the numbered SQL files. The Word assessment report contains the diagrams, explanations, and MySQL Workbench screenshots used as evidence.
 Attribution
-The initial database design was collaborative. The individual SQL features, security experiments, transaction demonstrations and supporting report evidence are presented as my own coursework contribution. Academic sources and MySQL documentation are referenced in the individual assessment report.
+The initial database design was developed collaboratively. The SQL implementation, individual query features, security and transaction demonstrations, and associated report evidence are presented as my individual contribution. The academic and MySQL documentation references appear in the assessment report.
