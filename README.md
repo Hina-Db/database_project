@@ -71,7 +71,6 @@ Assumptions and limitations
 - The source's follow-up intervals are converted into due dates; Planned is an assumed initial status.
 - An appointment with the medicine value None is represented without a prescription.
 - The core model comprises eleven tables; the login mapping and encrypted-note demo tables extend it for testing.
-- Source-data check: the original assessment record for OP001 has postcode NE1 4AB, while the uploaded data_population.sql currently inserts NE14 4AB. Correct the seed record to the source value before a final rebuild and repository submission.
 - This prototype is not clinically validated. Production use would require stronger account provisioning, managed encryption keys, audit logging, broader role testing, and more extensive validation.
 Re-running safely
 table creation.sql drops and recreates the core tables. After security and encryption scripts have been run, the extra PATIENT_DB_ACCOUNT and ENCRYPTED_NOTE_DEMO tables also reference core tables. Therefore, do not rerun the schema script over an existing populated database without first accounting for these dependent tables. The recommended approach is to recreate a fresh, isolated coursework database and follow the documented order.
