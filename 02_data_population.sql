@@ -1,7 +1,7 @@
 
 -- CROWNFIELD EYE HOSPITAL
--- FILE: 02_sample_data.sql
--- Run AFTER 01_schema.sql
+-- FILE: 02_data_population.sql
+-- Run AFTER 01_table_creation.sql
 -- Original sample records and clearly identified synthetic test records.
 
 USE crownfield_eye_hospital;
