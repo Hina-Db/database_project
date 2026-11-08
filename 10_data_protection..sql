@@ -2,7 +2,7 @@
 -- ==========================================
 -- CROWNFIELD EYE HOSPITAL
 -- PART D2: DATA PROTECTION
--- FILE: 07_data_protection.sql
+-- FILE: 10_data_protection.sql
 -- STEP 1: CREATE ENCRYPTED NOTES TABLE
 -- ==========================================
 
