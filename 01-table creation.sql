@@ -1,6 +1,6 @@
 
 -- CROWNFIELD EYE HOSPITAL DATABASE
--- FILE: 01_schema.sql
+-- FILE: 01_table_creation.sql
 
 -- WARNING: This script drops and recreates the coursework tables.
 
