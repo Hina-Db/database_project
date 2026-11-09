@@ -67,6 +67,53 @@ The patient role receives SELECT on v_patient_appointments rather than direct ac
 10_data_protection.sql demonstrates AES_ENCRYPT() and AES_DECRYPT() using AES-256-CBC, HKDF, a random IV and salt. The randomly generated encryption key exists only in a session variable. This is a coursework demonstration, not production key management.
 
 Demonstration credentials: 08_security.sql contains fixed example passwords for local fictional test accounts only. They are not intended for real accounts or network-exposed installations; do not reuse them for any real service. If any password has been used outside the isolated test environment, change it before publishing. GitHub commit history may retain earlier versions of a file.
+
+## Optional Extra-Credit: SQL Injection Prevention
+
+### Purpose
+
+This demonstration shows how parameterised SQL queries
+can help prevent SQL injection attacks.
+
+### SQL File
+
+`12_sql_injection_prevention.sql`
+
+This script uses a MySQL prepared statement with a
+parameter placeholder (?) to retrieve appointments
+for a specified patient.
+
+### Testing
+
+Test 1 — Valid patient ID:
+- Input: OP001
+- Expected result: Two appointment records.
+
+Test 2 — Injection-like input:
+- Input: OP001' OR '1'='1
+- Expected result: Zero rows.
+- Explanation: The input is treated as data rather
+  than being executed as part of the SQL query.
+
+### Screenshot Evidence
+
+Normal input:
+
+![Normal parameterised query result](Screenshots/12_sql_injection_normal.png)
+
+Injection prevention test:
+
+![SQL injection prevention result](Screenshots/13_sql_injection_prevented.png)
+
+### Security Conclusion
+
+Prepared statements separate SQL instructions from
+user-supplied values. Parameter binding helps prevent
+an attacker from changing the intended query logic.
+
+This is an additional secure-coding demonstration
+for Part D of the CPU4:103 assessment.
+
 ## Testing notes and limitations
 - The original appointment examples are taken from the fictional assessment scenario. Additional rows are labelled as synthetic test data.
 - The source postcode for OP001 is NE1 4AB, which is used in the corrected population script.
